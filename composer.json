@@ -1,7 +1,7 @@
 {
-    "name":         "bcncommerce/json-component",
+    "name":         "bcncommerce/json-stream",
     "description":  "A bundle of tools to work with JSON in PHP",
-    "keywords":     ["json", "parser", "streaming", "writer", "reader", "schema"],
+    "keywords":     ["json", "parser", "streaming", "writer", "reader"],
     "type":         "library",
     "license":      "MIT",
     "authors": [
