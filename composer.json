@@ -1,0 +1,23 @@
+{
+    "name":         "bcncommerce/json-component",
+    "description":  "A bundle of tools to work with JSON in PHP",
+    "keywords":     ["json", "parser", "streaming", "writer", "reader", "schema"],
+    "type":         "library",
+    "license":      "MIT",
+    "authors": [
+        {
+            "name":  "Sergey Kolodyazhnyy",
+            "email": "sergey.kolodyazhnyy@gmail.com"
+        }
+    ],
+    "require": {
+        "php": ">=5.3"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "~3.7.0"
+    },
+    "autoload": {
+        "psr-0": { "Bcn\\Component\\Json\\": "" }
+    },
+    "target-dir": "Bcn/Component/Json"
+}
