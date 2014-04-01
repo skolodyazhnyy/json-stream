@@ -10,6 +10,7 @@
 namespace Bcn\Component\Json\Tests;
 
 use Bcn\Component\Json\Writer;
+use Bcn\Component\StreamWrapper\Stream;
 
 /**
  * Class WriterTest
@@ -23,17 +24,17 @@ class WriterTest extends \PHPUnit_Framework_TestCase
      *
      * @dataProvider provideEncodeData
      */
-    public function testInsert($data)
+    public function testWrite($data)
     {
         $stream = fopen("php://memory", "r+");
         $writer = new Writer($stream);
-        $writer->insert($data);
+        $writer->write(null, $data);
 
         rewind($stream);
         $encoded = stream_get_contents($stream);
         fclose($stream);
 
-        $this->assertEquals($data, json_decode($encoded, true));
+        $this->assertEquals($data, json_decode($encoded, true), $encoded);
     }
 
     /**
@@ -48,9 +49,9 @@ class WriterTest extends \PHPUnit_Framework_TestCase
             'Decimal'                   => array(9.9991119),
             'Array'                     => array(1, 2, 3),
             'Object'                    => array('a' => 1, 'b' => 2),
-            'Array of objects'          => array(array('a' => 1, 'b' => 2), array('a' => 1, 'b' => 2)),
-            'Multilevel object'         => array('a' => array('a' => 1, 'b' => 2), 'b' => array('a' => 1, 'b' => 2)),
-            'Object with special keys'  => array('¡Hola!' => 'Hello!')
+            'Array of objects'          => array(array(array('a' => 1, 'b' => 2), array('a' => 1, 'b' => 2))),
+            'Multilevel object'         => array(array('a' => array('a' => 1, 'b' => 2), 'b' => array('a' => 1, 'b' => 2))),
+            'Object with special keys'  => array(array('¡Hola!' => 'Hello!'))
         );
     }
 
@@ -63,11 +64,11 @@ class WriterTest extends \PHPUnit_Framework_TestCase
     {
         $stream = fopen("php://memory", "r+");
         $writer = new Writer($stream);
-        $writer->start();
+        $writer->enter();
         foreach ($items as $item) {
-           $writer->insert($item);
+           $writer->write(null, $item);
         }
-        $writer->end();
+        $writer->leave();
 
         rewind($stream);
         $encoded = stream_get_contents($stream);
@@ -98,12 +99,11 @@ class WriterTest extends \PHPUnit_Framework_TestCase
     {
         $stream = fopen("php://memory", "r+");
         $writer = new Writer($stream);
-        $writer->start(true);
+        $writer->enter(Writer::TYPE_OBJECT);
         foreach ($items as $key => $item) {
-           $writer->key($key);
-           $writer->insert($item);
+           $writer->write($key, $item);
         }
-        $writer->end();
+        $writer->leave();
 
         rewind($stream);
         $encoded = stream_get_contents($stream);
@@ -123,9 +123,10 @@ class WriterTest extends \PHPUnit_Framework_TestCase
             'Object with numeric keys'   => array(array('2' => 1, '11' => 3)),
             'Object with multiple items' => array(array('a' => 1, 'b' => 2, 'c' => 3)),
             'Nested object'              => array(array(
-                'a' => array('aa' => 1, 'ab' => 2),
-                'b' => array('ba' => 2, 'bb' => 3),
-                'c' => 4)
+                    'a' => array('aa' => 1, 'ab' => 2),
+                    'b' => array('ba' => 2, 'bb' => 3),
+                    'c' => 4
+                )
             )
         );
     }
@@ -138,18 +139,17 @@ class WriterTest extends \PHPUnit_Framework_TestCase
         $stream = fopen("php://memory", "r+");
         $writer = new Writer($stream);
         $writer
-            ->start(true)
-                ->key("key")
-                ->start()
-                    ->start(true)
-                        ->key('inner')
-                        ->start()
-                            ->start()
-                            ->end()
-                        ->end()
-                    ->end()
-                ->end()
-            ->end()
+            ->enter(Writer::TYPE_OBJECT)
+                    ->enter("key", Writer::TYPE_ARRAY)
+                        ->enter(Writer::TYPE_OBJECT)
+                            ->enter("inner", Writer::TYPE_ARRAY)
+                                ->enter()
+                                ->leave()
+                            ->leave()
+                        ->leave()
+                    ->leave()
+                ->leave()
+            ->leave()
         ;
 
         rewind($stream);

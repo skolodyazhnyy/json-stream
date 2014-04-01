@@ -221,7 +221,11 @@ class Tokenizer
         $buffer  = "";
         $escaped = false;
 
-        while ($char = $this->readSymbol()) {
+        while (true) {
+            $char = $this->readSymbol();
+            if($char === false || $char === "") {
+                break;
+            }
             if ($quotes == $char && !$escaped) {
                 return $quotes === "\"" ? stripslashes($buffer) : $buffer;
             }
@@ -229,7 +233,7 @@ class Tokenizer
             $escaped = $quotes === "\"" && $char == "\\";
         }
 
-        throw new ReadingError("String not terminated correctly");
+        throw new ReadingError("String not terminated correctly " . ftell($this->stream));
     }
 
     /**

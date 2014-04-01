@@ -8,6 +8,11 @@
     tokens:
       - { key: null, token: scalar, content: Hello }
 
+'Zero string - 0000001':
+    content: '''0000001'''
+    tokens:
+      - { key: null, token: scalar, content: "0000001" }
+
 'Double-quoted string with special chars':
     content: '"Hello \"World\""'
     tokens: [{ key: null, token: scalar, content: 'Hello "World"' }]

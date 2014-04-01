@@ -8,6 +8,7 @@
  */
 
 namespace Bcn\Component\Json;
+use Bcn\Component\Json\Exception\WritingError;
 
 /**
  * Class Writer
@@ -15,6 +16,12 @@ namespace Bcn\Component\Json;
  */
 class Writer
 {
+
+    const TYPE_OBJECT = 1;
+    const TYPE_ARRAY  = 2;
+    const TYPE_NULL   = 3;
+    const TYPE_BOOL   = 4;
+    const TYPE_SCALAR = 5;
 
     const CONTEXT_NONE         = 0;
     const CONTEXT_ARRAY        = 1;
@@ -42,81 +49,65 @@ class Writer
     }
 
     /**
+     * @param $key
      * @param $value
      * @param null $type
-     *                   @return $this
+     * @return $this
+     * @throws Exception\WritingError
      */
-    public function insert($value, $type = null)
+    public function write($key, $value, $type = null)
     {
-        if ($this->context == self::CONTEXT_ARRAY) {
-            $this->write(',');
-        } elseif ($this->context == self::CONTEXT_ARRAY_START) {
-            $this->write("[");
-            $this->context = self::CONTEXT_ARRAY;
-        }
-
         if ($value instanceof \JsonSerializable) {
             $value = $value->jsonSerialize();
         }
 
         switch ($type ? : $this->getType($value)) {
-            case "null":
-                $this->write("null");
+            case self::TYPE_NULL:
+                $this->prefix($key);
+                $this->streamWrite('null');
                 break;
-            case "bool":
-                $this->write($value ? 'true' : 'false');
+            case self::TYPE_BOOL:
+                $this->prefix($key);
+                $this->streamWrite($value ? 'true' : 'false');
                 break;
-            case "scalar":
+            case self::TYPE_SCALAR:
+                $this->prefix($key);
                 $this->scalar($value);
                 break;
-            case "array":
-                $this->encodeArray($value);
+            case self::TYPE_ARRAY:
+                $this->encodeArray($key, $value);
                 break;
-            case "object":
-                $this->encodeObject($value);
+            case self::TYPE_OBJECT:
+                $this->encodeObject($key, $value);
                 break;
+            default:
+                throw new WritingError("Unrecognized type");
         }
 
-        $this->flush();
+        $this->streamFlush();
 
         return $this;
     }
 
     /**
-     * @param $key
+     * @param string $key
+     * @param int $type
      * @return $this
      */
-    public function key($key)
+    public function enter($key = null, $type = null)
     {
-        if ($this->context == self::CONTEXT_OBJECT) {
-            $this->write(',');
-        } elseif ($this->context == self::CONTEXT_OBJECT_START) {
-            $this->write("{");
-            $this->context = self::CONTEXT_OBJECT;
+        if($type === null) {
+            if(in_array($key, array(self::TYPE_OBJECT, self::TYPE_ARRAY))) {
+                $type = $key;
+                $key  = null;
+            } else {
+                $type = self::TYPE_ARRAY;
+            }
         }
-
-        $this->scalar((string) $key);
-        $this->write(":");
-
-        return $this;
-    }
-
-    /**
-     * @param bool $isObject
-     *                       @return $this
-     */
-    public function start($isObject = false)
-    {
-        if ($this->context == self::CONTEXT_ARRAY_START) {
-            $this->write("[");
-            $this->context = self::CONTEXT_ARRAY;
-        } elseif ($this->context == self::CONTEXT_OBJECT_START) {
-            $this->write("{");
-            $this->context = self::CONTEXT_OBJECT;
-        }
+        $this->prefix($key);
 
         array_push($this->parents, $this->context);
-        $this->context = $isObject ? self::CONTEXT_OBJECT_START : self::CONTEXT_ARRAY_START;
+        $this->context = $type == self::TYPE_OBJECT ? self::CONTEXT_OBJECT_START : self::CONTEXT_ARRAY_START;
 
         return $this;
     }
@@ -124,28 +115,20 @@ class Writer
     /**
      * @return $this
      */
-    public function object()
-    {
-        return $this->start(true);
-    }
-
-    /**
-     * @return $this
-     */
-    public function end()
+    public function leave()
     {
         switch ($this->context) {
             case self::CONTEXT_OBJECT:
-                $this->write("}");
+                $this->streamWrite("}");
                 break;
             case self::CONTEXT_OBJECT_START:
-                $this->write("{}");
+                $this->streamWrite("{}");
                 break;
             case self::CONTEXT_ARRAY:
-                $this->write("]");
+                $this->streamWrite("]");
                 break;
             case self::CONTEXT_ARRAY_START:
-                $this->write("[]");
+                $this->streamWrite("[]");
                 break;
         }
 
@@ -161,16 +144,22 @@ class Writer
     protected function getType($value)
     {
         if (is_bool($value)) {
-            return "bool";
-        } elseif (is_scalar($value)) {
-            return "scalar";
-        } elseif ((is_array($value) && !$this->isAssociative($value)) || (is_object($value) && $value instanceof \Traversable)) {
-            return "array";
-        } elseif (is_object($value) || is_array($value)) {
-            return "object";
+            return self::TYPE_BOOL;
+        }
+        if (is_scalar($value)) {
+            return self::TYPE_SCALAR;
+        }
+        if (is_array($value)  && !$this->isAssociative($value)) {
+            return self::TYPE_ARRAY;
+        }
+        if (is_object($value) && $value instanceof \Traversable) {
+            return self::TYPE_ARRAY;
+        }
+        if (is_object($value) || is_array($value)) {
+            return self::TYPE_OBJECT;
         }
 
-        return "null";
+        return self::TYPE_NULL;
     }
 
     /**
@@ -179,7 +168,7 @@ class Writer
      */
     public function scalar($value)
     {
-        $this->write(json_encode($value, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT));
+        $this->streamWrite(json_encode($value, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT));
 
         return $this;
     }
@@ -205,34 +194,35 @@ class Writer
     }
 
     /**
+     * @param $key
      * @param $array
      */
-    protected function encodeArray($array)
+    protected function encodeArray($key, $array)
     {
-        $this->start(false);
+        $this->enter($key, self::TYPE_ARRAY);
         foreach ($array as $value) {
-            $this->insert($value);
+            $this->write(null, $value);
         }
-        $this->end();
+        $this->leave();
     }
 
     /**
+     * @param $key
      * @param $object
      */
-    protected function encodeObject($object)
+    protected function encodeObject($key, $object)
     {
-        $this->start(true);
+        $this->enter($key, self::TYPE_OBJECT);
         foreach ($object as $key => $value) {
-            $this->key((string) $key);
-            $this->insert($value);
+            $this->write((string) $key, $value);
         }
-        $this->end();
+        $this->leave();
     }
 
     /**
      * @param $value
      */
-    protected function write($value)
+    protected function streamWrite($value)
     {
         fwrite($this->stream, $value);
     }
@@ -240,9 +230,43 @@ class Writer
     /**
      *
      */
-    protected function flush()
+    protected function streamFlush()
     {
         fflush($this->stream);
+    }
+
+    /**
+     * @param $key
+     */
+    protected function key($key)
+    {
+        $this->scalar((string)$key);
+        $this->streamWrite(":");
+    }
+
+    /**
+     * @param $key
+     */
+    protected function prefix($key)
+    {
+        switch ($this->context) {
+            case self::CONTEXT_OBJECT_START:
+                $this->streamWrite("{");
+                $this->key($key);
+                $this->context = self::CONTEXT_OBJECT;
+                break;
+            case self::CONTEXT_ARRAY_START:
+                $this->streamWrite("[");
+                $this->context = self::CONTEXT_ARRAY;
+                break;
+            case self::CONTEXT_OBJECT:
+                $this->streamWrite(',');
+                $this->key($key);
+                break;
+            case self::CONTEXT_ARRAY:
+                $this->streamWrite(',');
+                break;
+        }
     }
 
 }

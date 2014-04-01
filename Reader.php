@@ -39,6 +39,11 @@ class Reader
      */
     public function enter($key = null, $type = null)
     {
+        if($type === null && in_array($key, array(self::TYPE_OBJECT, self::TYPE_ARRAY))) {
+            $type = $key;
+            $key  = null;
+        }
+
         switch($type) {
             case self::TYPE_ARRAY:
                 $tokens = array(Tokenizer::TOKEN_ARRAY_START);
