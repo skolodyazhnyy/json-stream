@@ -80,6 +80,15 @@
         - { key: null, token: scalar,      content: Hola }
         - { key: null, token: array_end,   content: null }
 
+'Multiple items array with spaces':
+    content: "[   1.55 ,\n 99.2 , \"Ho\\\"la\r\"     ]"
+    tokens:
+        - { key: null, token: array_start, content: null }
+        - { key: null, token: scalar,      content: 1.55 }
+        - { key: null, token: scalar,      content: 99.2 }
+        - { key: null, token: scalar,      content: "Ho\"la\r" }
+        - { key: null, token: array_end,   content: null }
+
 'Nested array':
     content: "[[1,['a',[],\"b\"],2]]"
     tokens:

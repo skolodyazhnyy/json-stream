@@ -17,74 +17,111 @@ class ReaderTest extends \PHPUnit_Framework_TestCase
 {
 
     /**
-     * @param string $content
-     * @param array  $tokens
-     *
-     * @dataProvider provideTokens
-     */
-    public function testTokenizer($content, array $tokens)
-    {
-        $resource = fopen(new Stream($content), "r");
-
-        $reader = new Reader($resource);
-        foreach ($tokens as $token) {
-            $token['token'] = $this->toTokenCode($token['token']);
-            $this->assertEquals($token, $reader->next());
-        }
-
-        fclose($resource);
-    }
-
-    protected function toTokenCode($code)
-    {
-        switch ($code) {
-            case 'scalar':       return Reader::TOKEN_SCALAR;
-            case 'array_start':  return Reader::TOKEN_ARRAY_START;
-            case 'object_start': return Reader::TOKEN_OBJECT_START;
-            case 'array_end':    return Reader::TOKEN_ARRAY_END;
-            case 'object_end':   return Reader::TOKEN_OBJECT_END;
-        }
-
-        return $code;
-    }
-
-    /**
-     * @return array
-     */
-    public function provideTokens()
-    {
-        return Yaml::parse(__DIR__ . DIRECTORY_SEPARATOR . "fixtures" . DIRECTORY_SEPARATOR . "tokenizer.yml");
-    }
-
-    /**
      *
      */
     public function testObjectReading()
     {
-        $this->markTestIncomplete("Waiting for complete implementation of Reader");
+        $stream = new Stream(<<<JSON
+        {
+            "catalog": "catalog_code",
+            "stock": "stock_code",
+            "items": [
+                {"sku":"ABC","qty":1},
+                {"sku":"A\"BC","qty":.095},
+                {"sku":"CDE","qty":0}
+            ]
+        }
+JSON
+        );
 
-        $reader = new Reader($stream = fopen("", "r"));
+        $reader = new Reader(fopen($stream, "r"));
 
-        $reader->enter(null, Reader::TYPE_OBJECT); // enter root object
-            $catalog = $reader->read("catalog");   // read property catalog
-            $stock   = $reader->read("stock");     // read property stock
+        $this->assertTrue($reader->enter(null, Reader::TYPE_OBJECT));  // enter root object
+            $catalog = $reader->read("catalog");                       // read property catalog
+            $stock   = $reader->read("stock");                         // read property stock
             $items   = array();
-            $reader->enter("items");               // enter property items
-                while ($reader->enter()) {          // enter each item
-                    $sku = $reader->read("sku");   // read property sku
-                    $qty = $reader->read("qty");   // read property qty
-                    $reader->leave();              // leave item node
+            $this->assertTrue($reader->enter("items"));                // enter property items
+                while ($reader->enter()) {                             // enter each item
+                    $sku = $reader->read("sku");                       // read property sku
+                    $qty = $reader->read("qty");                       // read property qty
+                    $reader->leave();                                  // leave item node
 
                     $items[] = array("sku" => $sku, "qty" => $qty);
                 }
-            $reader->leave();                      // leave items node
-        $reader->leave();                          // leave root node
-
-        fclose($stream);
+            $reader->leave();                                          // leave items node
+        $reader->leave();                                              // leave root node
 
         $this->assertEquals("catalog_code", $catalog);
         $this->assertEquals("stock_code",   $stock);
+        $this->assertEquals(array(
+            array('sku' => 'ABC',  'qty' => 1),
+            array('sku' => 'A"BC', 'qty' => .095),
+            array('sku' => 'CDE',  'qty' => 0)
+        ),   $items);
 
     }
+    /**
+     *
+     */
+    public function testExtractReading()
+    {
+        $stream = new Stream(<<<JSON
+        {
+            "catalog": "catalog_code",
+            "stock": "stock_code",
+            "items": [
+                {"sku":"ABC","qty":1},
+                {"sku":"A\"BC","qty":.095},
+                {"sku":"CDE","qty":0}
+            ]
+        }
+JSON
+        );
+
+        $reader = new Reader(fopen($stream, "r"));
+        $this->assertEquals(array(
+            'catalog' => 'catalog_code',
+            'stock' => 'stock_code',
+            'items' => array(
+                array('sku' => 'ABC',  'qty' => 1),
+                array('sku' => 'A"BC', 'qty' => 0.095),
+                array('sku' => 'CDE',  'qty' => 0),
+            )
+        ), $reader->read());
+    }
+
+    /**
+     *
+     */
+    public function testReaderLeaving()
+    {
+        $stream = new Stream(<<<JSON
+        {
+            "first": "1",
+            "items": [
+                "String",
+                {"sku":"ABC","qty":1},
+                {"sku":"A\"BC","qty":.095},
+                999,
+                {"sku":"CDE","qty":[{  }]}
+            ],
+            "last": "2"
+        }
+JSON
+        );
+
+        $reader = new Reader(fopen($stream, "r"));
+
+        $this->assertTrue($reader->enter(null, Reader::TYPE_OBJECT));  // enter root object
+        $first = $reader->read("first");                               // read property first
+        $this->assertTrue($reader->enter("items"));                    // enter property items
+        $this->assertTrue($reader->leave());                           // leave items node
+        $last = $reader->read("last");                                 // leave root node
+
+        $this->assertEquals("1", $first);
+        $this->assertEquals("2", $last);
+
+    }
+
 
 }
