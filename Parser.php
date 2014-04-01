@@ -1,4 +1,11 @@
 <?php
+/**
+ *
+ * This file is part of the JSON Stream Project.
+ *
+ * @author Sergey Kolodyazhnyy <sergey.kolodyazhnyy@gmail.com>
+ *
+ */
 
 namespace Bcn\Component\Json;
 
@@ -9,8 +16,8 @@ use Bcn\Component\Json\Exception\ParsingError;
  * Class Parser
  * @package Bcn\Component\Json
  */
-class Parser {
-
+class Parser
+{
     const STATE_START_DOCUMENT     = 0;
     const STATE_DONE               = -1;
     const STATE_IN_ARRAY           = 1;
@@ -55,12 +62,13 @@ class Parser {
     private $charNumber;
 
     /**
-     * @param resource $stream
-     * @param ListenerInterface $listener
-     * @param string $lineEnding
+     * @param  resource                  $stream
+     * @param  ListenerInterface         $listener
+     * @param  string                    $lineEnding
      * @throws \InvalidArgumentException
      */
-    public function __construct($stream, ListenerInterface $listener, $lineEnding = null) {
+    public function __construct($stream, ListenerInterface $listener, $lineEnding = null)
+    {
         if (!is_resource($stream) || get_resource_type($stream) != 'stream') {
             throw new \InvalidArgumentException("Argument is not a stream");
         }
@@ -81,14 +89,15 @@ class Parser {
     /**
      * Parse stream content
      */
-    public function parse() {
+    public function parse()
+    {
         $this->lineNumber = 1;
         $this->charNumber = 1;
 
         while (!feof($this->stream)) {
             $pos = ftell($this->stream);
             $line = stream_get_line($this->stream, $this->bufferSize, $this->lineEnding);
-            $ended = (bool)(ftell($this->stream) - strlen($line) - $pos);
+            $ended = (bool) (ftell($this->stream) - strlen($line) - $pos);
 
             $byteLen = strlen($line);
             for ($i = 0; $i < $byteLen; $i++) {
@@ -106,10 +115,11 @@ class Parser {
     }
 
     /**
-     * @param string $c
-     * @throws JsonParser\ParsingError
+     * @param  string       $c
+     * @throws ParsingError
      */
-    private function consumeChar($c) {
+    private function consumeChar($c)
+    {
         // valid whitespace characters in JSON (from RFC4627 for JSON) include:
         // space, horizontal tab, line feed or new line, and carriage return.
         // thanks: http://stackoverflow.com/questions/16042274/definition-of-whitespace-in-json
@@ -281,7 +291,8 @@ class Parser {
      * @param $c
      * @return int
      */
-    private function isHexCharacter($c) {
+    private function isHexCharacter($c)
+    {
         return preg_match('/[0-9a-fA-F]/u', $c);
     }
 
@@ -291,12 +302,14 @@ class Parser {
      *
      * Thanks: http://stackoverflow.com/questions/1805802/php-convert-unicode-codepoint-to-utf-8
      */
-    private function convertCodepointToCharacter($num) {
+    private function convertCodepointToCharacter($num)
+    {
         if($num<=0x7F)       return chr($num);
         if($num<=0x7FF)      return chr(($num>>6)+192)  . chr(($num&63)+128);
         if($num<=0xFFFF)     return chr(($num>>12)+224) . chr((($num>>6)&63)+128)  . chr(($num&63)+128);
         if($num<=0x1FFFFF)   return chr(($num>>18)+240) . chr((($num>>12)&63)+128) .
                                     chr((($num>>6)&63)+128) . chr(($num&63)+128);
+
         return '';
     }
 
@@ -304,7 +317,8 @@ class Parser {
      * @param $c
      * @return int
      */
-    private function isDigit($c) {
+    private function isDigit($c)
+    {
         // Only concerned with the first character in a number.
         return preg_match('/[0-9]|-/u', $c);
     }
@@ -313,7 +327,8 @@ class Parser {
      * @param $c
      * @throws JsonParser\ParsingError
      */
-    private function startValue($c) {
+    private function startValue($c)
+    {
         if ($c === '[') {
             $this->startArray();
         } elseif ($c === '{') {
@@ -340,7 +355,8 @@ class Parser {
     /**
      *
      */
-    private function startArray() {
+    private function startArray()
+    {
         $this->listener->start_array();
         $this->state = self::STATE_IN_ARRAY;
         array_push($this->stack, self::STACK_ARRAY);
@@ -349,7 +365,8 @@ class Parser {
     /**
      * @throws JsonParser\ParsingError
      */
-    private function endArray() {
+    private function endArray()
+    {
         $popped = array_pop($this->stack);
         if ($popped !== self::STACK_ARRAY) {
             throw new ParsingError($this->lineNumber, $this->charNumber,
@@ -363,11 +380,11 @@ class Parser {
         }
     }
 
-
     /**
      *
      */
-    private function startObject() {
+    private function startObject()
+    {
         $this->listener->start_object();
         $this->state = self::STATE_IN_OBJECT;
         array_push($this->stack, self::STACK_OBJECT);
@@ -376,7 +393,8 @@ class Parser {
     /**
      * @throws JsonParser\ParsingError
      */
-    private function endObject() {
+    private function endObject()
+    {
         $popped = array_pop($this->stack);
         if ($popped !== self::STACK_OBJECT) {
             throw new ParsingError($this->lineNumber, $this->charNumber,
@@ -393,7 +411,8 @@ class Parser {
     /**
      *
      */
-    private function startString() {
+    private function startString()
+    {
         array_push($this->stack, self::STACK_STRING);
         $this->state = self::STATE_IN_STRING;
     }
@@ -401,7 +420,8 @@ class Parser {
     /**
      *
      */
-    private function startKey() {
+    private function startKey()
+    {
         array_push($this->stack, self::STACK_KEY);
         $this->state = self::STATE_IN_STRING;
     }
@@ -409,7 +429,8 @@ class Parser {
     /**
      * @throws JsonParser\ParsingError
      */
-    private function endString() {
+    private function endString()
+    {
         $popped = array_pop($this->stack);
         if ($popped === self::STACK_KEY) {
             $this->listener->key($this->buffer);
@@ -428,7 +449,8 @@ class Parser {
      * @param $c
      * @throws JsonParser\ParsingError
      */
-    private function processEscapeCharacter($c) {
+    private function processEscapeCharacter($c)
+    {
         if ($c === '"') {
             $this->buffer .= '"';
         } elseif ($c === '\\') {
@@ -461,7 +483,8 @@ class Parser {
      * @param $c
      * @throws JsonParser\ParsingError
      */
-    private function processUnicodeCharacter($c) {
+    private function processUnicodeCharacter($c)
+    {
         if (!$this->isHexCharacter($c)) {
             throw new ParsingError($this->lineNumber, $this->charNumber,
                 "Expected hex character for escaped unicode character. Unicode parsed: " . implode($this->unicodeBuffer) . " and got: ".$c);
@@ -490,18 +513,19 @@ class Parser {
     /**
      * @param $codepoint
      */
-    private function endUnicodeCharacter($codepoint) {
+    private function endUnicodeCharacter($codepoint)
+    {
         $this->buffer .= $this->convertCodepointToCharacter($codepoint);
         $this->unicodeBuffer = array();
         $this->unicodeHighCodePoint = -1;
         $this->state = self::STATE_IN_STRING;
     }
 
-
     /**
      * @param $c
      */
-    private function startNumber($c) {
+    private function startNumber($c)
+    {
         $this->state = self::STATE_IN_NUMBER;
         $this->buffer .= $c;
     }
@@ -509,12 +533,13 @@ class Parser {
     /**
      *
      */
-    private function endNumber() {
+    private function endNumber()
+    {
         $num = $this->buffer;
         if (preg_match('/\./', $num)) {
-            $num = (float)($num);
+            $num = (float) ($num);
         } else {
-            $num = (int)($num);
+            $num = (int) ($num);
         }
         $this->listener->value($num);
 
@@ -522,11 +547,11 @@ class Parser {
         $this->state = self::STATE_AFTER_VALUE;
     }
 
-
     /**
      * @throws JsonParser\ParsingError
      */
-    private function endTrue() {
+    private function endTrue()
+    {
         $true = $this->buffer;
         if ($true === 'true') {
             $this->listener->value(true);
@@ -541,7 +566,8 @@ class Parser {
     /**
      * @throws JsonParser\ParsingError
      */
-    private function endFalse() {
+    private function endFalse()
+    {
         $false = $this->buffer;
         if ($false === 'false') {
             $this->listener->value(false);
@@ -556,7 +582,8 @@ class Parser {
     /**
      * @throws JsonParser\ParsingError
      */
-    private function endNull() {
+    private function endNull()
+    {
         $null = $this->buffer;
         if ($null === 'null') {
             $this->listener->value(null);
@@ -568,11 +595,11 @@ class Parser {
         $this->state = self::STATE_AFTER_VALUE;
     }
 
-
     /**
      *
      */
-    private function endDocument() {
+    private function endDocument()
+    {
         $this->listener->end_document();
         $this->state = self::STATE_DONE;
     }

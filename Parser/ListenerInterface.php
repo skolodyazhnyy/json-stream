@@ -1,4 +1,11 @@
 <?php
+/**
+ *
+ * This file is part of the JSON Stream Project.
+ *
+ * @author Sergey Kolodyazhnyy <sergey.kolodyazhnyy@gmail.com>
+ *
+ */
 
 namespace Bcn\Component\Json\Parser;
 
@@ -6,11 +13,11 @@ namespace Bcn\Component\Json\Parser;
  * Interface ListenerInterface
  * @package Bcn\Component\Json\Parser
  */
-interface ListenerInterface {
-
+interface ListenerInterface
+{
     /**
-     * @param integer $line
-     * @param integer $char
+     * @param  integer $line
+     * @param  integer $char
      * @return void
      */
     public function file_position($line, $char);
@@ -46,13 +53,13 @@ interface ListenerInterface {
     public function end_array();
 
     /**
-     * @param string $key
+     * @param  string $key
      * @return void
      */
     public function key($key);
 
     /**
-     * @param string $value
+     * @param  string $value
      * @return void
      */
     public function value($value);

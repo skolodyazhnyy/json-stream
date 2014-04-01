@@ -1,4 +1,11 @@
 <?php
+/**
+ *
+ * This file is part of the JSON Stream Project.
+ *
+ * @author Sergey Kolodyazhnyy <sergey.kolodyazhnyy@gmail.com>
+ *
+ */
 
 namespace Bcn\Component\Json\Tests\Parser;
 
@@ -138,11 +145,12 @@ JSON
         $stream = fopen('php://memory', 'rw');
         fwrite($stream, $content);
         fseek($stream, 0);
+
         return $stream;
     }
 
     /**
-     * @param string $name
+     * @param  string $name
      * @return string
      */
     protected function getFixtureName($name)

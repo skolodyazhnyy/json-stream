@@ -1,4 +1,11 @@
 <?php
+/**
+ *
+ * This file is part of the JSON Stream Project.
+ *
+ * @author Sergey Kolodyazhnyy <sergey.kolodyazhnyy@gmail.com>
+ *
+ */
 
 namespace Bcn\Component\Json;
 
@@ -21,7 +28,7 @@ class Writer
     protected $parents = array();
 
     /**
-     * @param resource $stream A stream resource.
+     * @param  resource                  $stream A stream resource.
      * @throws \InvalidArgumentException If $stream is not a stream resource.
      */
     public function __construct($stream)
@@ -37,7 +44,7 @@ class Writer
     /**
      * @param $value
      * @param null $type
-     * @return $this
+     *                   @return $this
      */
     public function insert($value, $type = null)
     {
@@ -96,7 +103,7 @@ class Writer
 
     /**
      * @param bool $isObject
-     * @return $this
+     *                       @return $this
      */
     public function start($isObject = false)
     {

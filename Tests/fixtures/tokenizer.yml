@@ -1,0 +1,123 @@
+'Double-quoted string':
+    content: '"Hello"'
+    tokens:
+      - { key: null, token: scalar, content: Hello }
+
+'Single-quoted string':
+    content: '''Hello'''
+    tokens:
+      - { key: null, token: scalar, content: Hello }
+
+'Double-quoted string with special chars':
+    content: '"Hello \"World\""'
+    tokens: [{ key: null, token: scalar, content: 'Hello "World"' }]
+
+'Number 99.99':
+    content: '99.99'
+    tokens: [{ key: null, token: scalar, content: 99.99 }]
+
+'Number .99':
+    content: '.99'
+    tokens: [{ key: null, token: scalar, content: 0.99 }]
+
+'Number 0.001':
+    content: '0.001'
+    tokens: [{ key: null, token: scalar, content: 0.001 }]
+
+'Number 000123':
+    content: '000123'
+    tokens: [{ key: null, token: scalar, content: 123 }]
+
+'Number -.5':
+    content: '-.5'
+    tokens: [{ key: null, token: scalar, content: -0.5 }]
+
+'Number -.01e15':
+    content: '-.01e15'
+    tokens: [{ key: null, token: scalar, content: -10000000000000 }]
+
+'True':
+    content: 'true'
+    tokens: [{ key: null, token: scalar, content: true }]
+
+'False':
+    content: 'false'
+    tokens: [{ key: null, token: scalar, content: false }]
+
+'Null':
+    content: 'null'
+    tokens: [{ key: null, token: scalar, content: null }]
+
+'Object':
+    content: '{}'
+    tokens:
+        - { key: null, token: object_start, content: null }
+        - { key: null, token: object_end,   content: null }
+
+'Array':
+    content: '[]'
+    tokens:
+        - { key: null, token: array_start, content: null }
+        - { key: null, token: array_end,   content: null }
+
+'Skip leading whitespaces':
+    content: "\n\t\r    \"String\""
+    tokens: [{ key: null, token: scalar, content: String }]
+
+'Single item array':
+    content: "[1.55]"
+    tokens:
+        - { key: null, token: array_start, content: null }
+        - { key: null, token: scalar,      content: 1.55 }
+        - { key: null, token: array_end,   content: null }
+
+'Multiple items array':
+    content: "[1.55,99.2,\"Hola\"]"
+    tokens:
+        - { key: null, token: array_start, content: null }
+        - { key: null, token: scalar,      content: 1.55 }
+        - { key: null, token: scalar,      content: 99.2 }
+        - { key: null, token: scalar,      content: Hola }
+        - { key: null, token: array_end,   content: null }
+
+'Nested array':
+    content: "[[1,['a',[],\"b\"],2]]"
+    tokens:
+        - { key: null, token: array_start, content: null }
+        - { key: null, token: array_start, content: null }
+        - { key: null, token: scalar,      content: 1 }
+        - { key: null, token: array_start, content: null }
+        - { key: null, token: scalar,      content: 'a' }
+        - { key: null, token: array_start, content: null }
+        - { key: null, token: array_end,   content: null }
+        - { key: null, token: scalar,      content: 'b' }
+        - { key: null, token: array_end,   content: null }
+        - { key: null, token: scalar,      content: 2 }
+        - { key: null, token: array_end,   content: null }
+        - { key: null, token: array_end,   content: null }
+
+'Single property object':
+    content: "{ \"Root\":001}"
+    tokens:
+        - { key: null,   token: object_start, content: null }
+        - { key: "Root", token: scalar,       content: 1 }
+
+'Multiple property object':
+    content: "{\"Child A\": \"VALUE1\", \"Child B\": [] }"
+    tokens:
+        - { key: null,      token: object_start, content: null }
+        - { key: "Child A", token: scalar,       content: "VALUE1" }
+        - { key: "Child B", token: array_start,  content: null }
+        - { key: null,      token: array_end,    content: null }
+        - { key: null,      token: object_end,   content: null }
+
+'Nested object':
+    content: "{\"Root\": { \"Child A\": \"VALUE1\", \"Child B\": [] } }"
+    tokens:
+        - { key: null,      token: object_start, content: null }
+        - { key: "Root",    token: object_start, content: null }
+        - { key: "Child A", token: scalar,       content: "VALUE1" }
+        - { key: "Child B", token: array_start,  content: null }
+        - { key: null,      token: array_end,    content: null }
+        - { key: null,      token: object_end,   content: null }
+        - { key: null,      token: object_end,   content: null }

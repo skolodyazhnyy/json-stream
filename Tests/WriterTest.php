@@ -1,4 +1,11 @@
 <?php
+/**
+ *
+ * This file is part of the JSON Stream Project.
+ *
+ * @author Sergey Kolodyazhnyy <sergey.kolodyazhnyy@gmail.com>
+ *
+ */
 
 namespace Bcn\Component\Json\Tests;
 
