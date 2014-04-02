@@ -96,8 +96,8 @@ class Writer
      */
     public function enter($key = null, $type = null)
     {
-        if($type === null) {
-            if(in_array($key, array(self::TYPE_OBJECT, self::TYPE_ARRAY))) {
+        if ($type === null) {
+            if (in_array($key, array(self::TYPE_OBJECT, self::TYPE_ARRAY))) {
                 $type = $key;
                 $key  = null;
             } else {
@@ -240,7 +240,7 @@ class Writer
      */
     protected function key($key)
     {
-        $this->scalar((string)$key);
+        $this->scalar((string) $key);
         $this->streamWrite(":");
     }
 

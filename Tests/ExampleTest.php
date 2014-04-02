@@ -12,11 +12,9 @@ namespace Bcn\Component\Json\Tests;
 use Bcn\Component\Json\Reader;
 use Bcn\Component\Json\Writer;
 use Bcn\Component\StreamWrapper\Stream;
-use Symfony\Component\Yaml\Yaml;
 
 class ExampleTest extends \PHPUnit_Framework_TestCase
 {
-
 
     public function testWriting()
     {
@@ -29,7 +27,7 @@ class ExampleTest extends \PHPUnit_Framework_TestCase
         $writer->enter(Writer::TYPE_OBJECT);                // enter root object
             $writer->write("catalog", $catalog['id']);      // write key-value entry
             $writer->enter("items", Writer::TYPE_ARRAY);    // enter items array
-                foreach($catalog['products'] as $product) {
+                foreach ($catalog['products'] as $product) {
                     $writer->write(null, array(             // write an array item
                         'sku'  => $product['sku'],
                         'name' => $product['name']
@@ -57,7 +55,7 @@ class ExampleTest extends \PHPUnit_Framework_TestCase
         $reader->enter(Reader::TYPE_OBJECT);                // enter root object
             $catalog['id'] = $reader->read("catalog");      // read catalog node
             $reader->enter("items", Reader::TYPE_ARRAY);    // enter item array
-                while($product = $reader->read()) {         // read product structure
+                while ($product = $reader->read()) {         // read product structure
                     $catalog['products'][] = $product;
                 }
             $reader->leave();                               // leave item node
@@ -89,6 +87,5 @@ class ExampleTest extends \PHPUnit_Framework_TestCase
     {
         return '{"catalog":19,"items":[{"sku":"0001","name":"Product #1"},{"sku":"0002","name":"Product #2"}]}';
     }
-
 
 }

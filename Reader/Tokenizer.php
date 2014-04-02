@@ -71,7 +71,7 @@ class Tokenizer
     {
         $this->token = $this->fetch();
 
-        if(!$this->token['token']) {
+        if (!$this->token['token']) {
             return false;
         }
 
@@ -223,7 +223,7 @@ class Tokenizer
 
         while (true) {
             $char = $this->readSymbol();
-            if($char === false || $char === "") {
+            if ($char === false || $char === "") {
                 break;
             }
             if ($quotes == $char && !$escaped) {

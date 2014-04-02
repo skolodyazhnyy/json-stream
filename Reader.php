@@ -39,12 +39,12 @@ class Reader
      */
     public function enter($key = null, $type = null)
     {
-        if($type === null && in_array($key, array(self::TYPE_OBJECT, self::TYPE_ARRAY))) {
+        if ($type === null && in_array($key, array(self::TYPE_OBJECT, self::TYPE_ARRAY))) {
             $type = $key;
             $key  = null;
         }
 
-        switch($type) {
+        switch ($type) {
             case self::TYPE_ARRAY:
                 $tokens = array(Tokenizer::TOKEN_ARRAY_START);
                 break;
@@ -55,11 +55,12 @@ class Reader
                 $tokens = array(Tokenizer::TOKEN_ARRAY_START, Tokenizer::TOKEN_OBJECT_START);
         }
 
-        if($this->token['key'] != $key || !in_array($this->token['token'], $tokens)) {
+        if ($this->token['key'] != $key || !in_array($this->token['token'], $tokens)) {
             return false;
         }
 
         $this->next();
+
         return true;
     }
 
@@ -74,7 +75,7 @@ class Reader
 
         $level = 0;
         do {
-            switch($this->token['token']) {
+            switch ($this->token['token']) {
                 case Tokenizer::TOKEN_ARRAY_START:
                 case Tokenizer::TOKEN_OBJECT_START:
                     $level++;
@@ -86,7 +87,7 @@ class Reader
             }
 
             $this->next();
-        } while($level >= 0 && $this->tokenizer->context());
+        } while ($level >= 0 && $this->tokenizer->context());
 
         return true;
     }
@@ -97,14 +98,15 @@ class Reader
      */
     public function read($key = null)
     {
-        if($this->token['key'] != $key) {
+        if ($this->token['key'] != $key) {
             return false;
         }
 
-        switch($this->token['token']) {
+        switch ($this->token['token']) {
             case Tokenizer::TOKEN_SCALAR:
                 $value = $this->token['content'];
                 $this->next();
+
                 return $value;
             case Tokenizer::TOKEN_ARRAY_START:
                 $items = array();
@@ -113,6 +115,7 @@ class Reader
                     $items[] = $this->read();
                 }
                 $this->leave();
+
                 return $items;
             case Tokenizer::TOKEN_OBJECT_START:
                 $items = array();
@@ -121,6 +124,7 @@ class Reader
                     $items[$this->token['key']] = $this->read($this->token['key']);
                 }
                 $this->leave();
+
                 return $items;
         }
 

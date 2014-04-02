@@ -11,7 +11,6 @@ namespace Bcn\Component\Json\Tests;
 
 use Bcn\Component\Json\Reader;
 use Bcn\Component\StreamWrapper\Stream;
-use Symfony\Component\Yaml\Yaml;
 
 class ReaderTest extends \PHPUnit_Framework_TestCase
 {
