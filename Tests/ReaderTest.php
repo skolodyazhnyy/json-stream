@@ -141,9 +141,8 @@ JSON
     public function provideReadingData()
     {
         return array(
-            "Single quoted string" => array("'test'", "test"),
             "Double quoted string" => array('"test"', "test"),
-            "Escaped string"       => array(json_encode("\"!@\n\t#$%^&*()_+/\\\"\'"), "\"!@\n\t#$%^&*()_+/\\\"\'"),
+            "Escaped string"       => array(json_encode("\"!@\n\t#$%^&*()_+/\\\"\\'"), "\"!@\n\t#$%^&*()_+/\\\"\\'"),
             "Integer"              => array("12345", 12345),
             "Float"                => array("123.45", 123.45),
         );

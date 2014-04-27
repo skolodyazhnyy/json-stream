@@ -202,7 +202,6 @@ class Tokenizer
             case ",":
                 return array(self::TOKEN_ITEM_SEPARATOR, null);
             case "\"":
-            case "'":
                 return array(self::TOKEN_SCALAR, $this->completeStringReading($char));
             default:
                 return array(self::TOKEN_SCALAR, $this->completeScalarReading($char));
@@ -227,7 +226,7 @@ class Tokenizer
                 break;
             }
             if ($quotes == $char && !$escaped) {
-                return $quotes === "\"" ? json_decode("\"$buffer\"") : $buffer;
+                return json_decode($quotes . $buffer . $quotes);
             }
             $buffer .= $char;
             $escaped = $quotes === "\"" && $char == "\\";
