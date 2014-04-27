@@ -227,7 +227,7 @@ class Tokenizer
                 break;
             }
             if ($quotes == $char && !$escaped) {
-                return $quotes === "\"" ? stripslashes($buffer) : $buffer;
+                return $quotes === "\"" ? json_decode("\"$buffer\"") : $buffer;
             }
             $buffer .= $char;
             $escaped = $quotes === "\"" && $char == "\\";

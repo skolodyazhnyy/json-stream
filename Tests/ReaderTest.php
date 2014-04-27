@@ -122,4 +122,31 @@ JSON
 
     }
 
+    /**
+     * @param $string
+     * @param $data
+     *
+     * @dataProvider provideReadingData
+     */
+    public function testReading($string, $data)
+    {
+        $stream = new Stream($string);
+        $reader = new Reader(fopen($stream, "r"));
+        $this->assertEquals($data, $reader->read());
+    }
+
+    /**
+     * @return array
+     */
+    public function provideReadingData()
+    {
+        return array(
+            "Single quoted string" => array("'test'", "test"),
+            "Double quoted string" => array('"test"', "test"),
+            "Escaped string"       => array(json_encode("\"!@\n\t#$%^&*()_+/\\\"\'"), "\"!@\n\t#$%^&*()_+/\\\"\'"),
+            "Integer"              => array("12345", 12345),
+            "Float"                => array("123.45", 123.45),
+        );
+    }
+
 }
