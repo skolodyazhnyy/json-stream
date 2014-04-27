@@ -149,4 +149,30 @@ JSON
         );
     }
 
+    /**
+     * @param $content
+     * @dataProvider provideMalformedFiles
+     */
+    public function testMalformedFileReading($content)
+    {
+        $this->setExpectedException('Bcn\Component\Json\Exception\ReadingError');
+
+        $reader = new Reader(fopen(new Stream($content), "r"));
+        $reader->read();
+    }
+
+    /**
+     * @return array
+     */
+    public function provideMalformedFiles()
+    {
+        return array(
+            'Unquoted string'                       => array('string'),
+            'Unwrapped array items'                 => array('"Array", "Array"'),
+            'Property name in non-object context'   => array('"key": "Value"'),
+            'Property name in array'                => array('["key": "Value"]'),
+            'Malformed object'                     => array('{"key": "Value": "Test"}')
+        );
+    }
+
 }

@@ -9,6 +9,7 @@
 
 namespace Bcn\Component\Json;
 
+use Bcn\Component\Json\Exception\ReadingError;
 use Bcn\Component\Json\Reader\Tokenizer;
 
 class Reader
@@ -86,8 +87,7 @@ class Reader
                     break;
             }
 
-            $this->next();
-        } while ($level >= 0 && $this->tokenizer->context());
+        } while ($this->next() && $level >= 0 && $this->tokenizer->context());
 
         return true;
     }
@@ -113,6 +113,10 @@ class Reader
                 $this->enter($this->token['key']);
                 while ($this->token['token'] != Tokenizer::TOKEN_ARRAY_END) {
                     $items[] = $this->read();
+
+                    if (!$this->token) {
+                        throw new ReadingError("Unexpected object ending");
+                    }
                 }
                 $this->leave();
 
@@ -122,6 +126,10 @@ class Reader
                 $this->enter($this->token['key']);
                 while ($this->token['token'] != Tokenizer::TOKEN_OBJECT_END) {
                     $items[$this->token['key']] = $this->read($this->token['key']);
+
+                    if (!$this->token) {
+                        throw new ReadingError("Unexpected object ending");
+                    }
                 }
                 $this->leave();
 
@@ -136,7 +144,7 @@ class Reader
      */
     protected function next()
     {
-        $this->token = $this->tokenizer->next();
+        return $this->token = $this->tokenizer->next();
     }
 
 }
