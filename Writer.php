@@ -149,6 +149,9 @@ class Writer
         if (is_scalar($value)) {
             return self::TYPE_SCALAR;
         }
+        if (is_array($value) && empty($value)) {
+            return self::TYPE_ARRAY;
+        }
         if (is_array($value)  && !$this->isAssociative($value)) {
             return self::TYPE_ARRAY;
         }
