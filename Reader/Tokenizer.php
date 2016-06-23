@@ -229,7 +229,7 @@ class Tokenizer
                 return json_decode($quotes . $buffer . $quotes);
             }
             $buffer .= $char;
-            $escaped = $quotes === "\"" && $char == "\\";
+            $escaped = !$escaped && $quotes === "\"" && $char == "\\";
         }
 
         throw new ReadingError("String not terminated correctly " . ftell($this->stream));
