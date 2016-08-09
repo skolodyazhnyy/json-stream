@@ -264,7 +264,7 @@ class Tokenizer
                 return null;
         }
 
-        if (!preg_match("/^-?[0-9]*(\.[0-9]+)?(e[0-9]+)?$/", $buffer)) {
+        if (!preg_match('/^-?(?:0|[1-9]\d*)?(?:\.\d+)?(?:[eE][+-]?\d+)?$/', $buffer)) {
             throw new ReadingError(sprintf("Scalar value \"%s\" is invalid", $buffer));
         }
 
