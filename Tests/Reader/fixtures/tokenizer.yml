@@ -24,10 +24,6 @@
     content: '0.001'
     tokens: [{ key: null, token: scalar, content: 0.001 }]
 
-'Number 000123':
-    content: '000123'
-    tokens: [{ key: null, token: scalar, content: 123 }]
-
 'Number -.5':
     content: '-.5'
     tokens: [{ key: null, token: scalar, content: -0.5 }]
@@ -35,6 +31,10 @@
 'Number -.01e15':
     content: '-.01e15'
     tokens: [{ key: null, token: scalar, content: -10000000000000 }]
+
+'Number -5e-7':
+    content: '-5e-7'
+    tokens: [{ key: null, token: scalar, content: -0.0000005 }]
 
 'True':
     content: 'true'
@@ -106,7 +106,7 @@
         - { key: null, token: array_end,   content: null }
 
 'Single property object':
-    content: "{ \"Root\":001}"
+    content: "{ \"Root\":1}"
     tokens:
         - { key: null,   token: object_start, content: null }
         - { key: "Root", token: scalar,       content: 1 }
