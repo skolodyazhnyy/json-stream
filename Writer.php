@@ -8,6 +8,7 @@
  */
 
 namespace Bcn\Component\Json;
+
 use Bcn\Component\Json\Exception\WritingError;
 
 /**
@@ -16,12 +17,12 @@ use Bcn\Component\Json\Exception\WritingError;
  */
 class Writer
 {
-
     const TYPE_OBJECT = 1;
     const TYPE_ARRAY  = 2;
     const TYPE_NULL   = 3;
     const TYPE_BOOL   = 4;
     const TYPE_SCALAR = 5;
+    const TYPE_URI = 6;
 
     const CONTEXT_NONE         = 0;
     const CONTEXT_ARRAY        = 1;
@@ -79,6 +80,10 @@ class Writer
                 break;
             case self::TYPE_OBJECT:
                 $this->encodeObject($key, $value);
+                break;
+            case self::TYPE_URI:
+                $this->prefix($key);
+                $this->uri($value);
                 break;
             default:
                 throw new WritingError("Unrecognized type");
@@ -172,6 +177,17 @@ class Writer
     public function scalar($value)
     {
         $this->streamWrite(json_encode($value, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT));
+
+        return $this;
+    }
+    
+    /**
+     * @param $value
+     * @return $this
+     */
+    public function uri($value)
+    {
+        $this->streamWrite(json_encode($value, JSON_UNESCAPED_SLASHES));
 
         return $this;
     }
@@ -271,5 +287,4 @@ class Writer
                 break;
         }
     }
-
 }
