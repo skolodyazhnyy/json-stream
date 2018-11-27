@@ -40,7 +40,7 @@ class Reader
      */
     public function enter($key = null, $type = null)
     {
-        if ($type === null && in_array($key, array(self::TYPE_OBJECT, self::TYPE_ARRAY))) {
+        if ($type === null && in_array($key, array(self::TYPE_OBJECT, self::TYPE_ARRAY), true)) {
             $type = $key;
             $key  = null;
         }
