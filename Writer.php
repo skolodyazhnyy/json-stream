@@ -30,21 +30,32 @@ class Writer
     const CONTEXT_OBJECT_START = 4;
 
     protected $stream;
+    protected $options;
     protected $context;
 
     protected $parents = array();
 
     /**
      * @param  resource                  $stream A stream resource.
+     * @param  int                       $options JSON encoding options.
      * @throws \InvalidArgumentException If $stream is not a stream resource.
      */
-    public function __construct($stream)
+    public function __construct($stream, $options = null)
     {
         if (!is_resource($stream) || get_resource_type($stream) != 'stream') {
             throw new \InvalidArgumentException("Resource is not a stream");
         }
 
+        if ($options === null) {
+            $options = JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT;
+        }
+
+        if (!is_int($options)) {
+            throw new \InvalidArgumentException("Options should be an integer");
+        }
+
         $this->stream  = $stream;
+        $this->options = $options;
         $this->context = self::CONTEXT_NONE;
     }
 
@@ -171,7 +182,7 @@ class Writer
      */
     public function scalar($value)
     {
-        $this->streamWrite(json_encode($value, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT));
+        $this->streamWrite(json_encode($value, $this->options));
 
         return $this;
     }

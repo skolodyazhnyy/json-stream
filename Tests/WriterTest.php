@@ -37,6 +37,21 @@ class WriterTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($data, json_decode($encoded, true), $encoded);
     }
 
+    public function testWriteWithCustomOptions()
+    {
+        $options = JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES;
+
+        $stream = fopen("php://memory", "r+");
+        $writer = new Writer($stream, $options);
+        $writer->write(null, "Les mystérieuses cités d'or");
+
+        rewind($stream);
+        $encoded = stream_get_contents($stream);
+        fclose($stream);
+
+        $this->assertEquals("Les mystérieuses cités d'or", $encoded);
+    }
+
     /**
      * @return array
      */
