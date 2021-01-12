@@ -1,6 +1,8 @@
 PHP JSON Component
 ==================
 
+[![Build Status](https://github.com/skolodyazhnyy/json-stream/workflows/CI/badge.svg)](https://github.com/skolodyazhnyy/json-stream/actions?query=workflow%3ACI)
+
 This project is a rewritten fork of few very nice JSON libs for PHP:
 
 - [salsify/jsonstreamingparser](https://github.com/salsify/jsonstreamingparser) - Json Stream Parser
