@@ -11,12 +11,13 @@
         }
     ],
     "require": {
-        "php": ">=5.3",
+        "php": ">=7.3",
         "ext-json": "*"
     },
     "require-dev": {
-        "phpunit/phpunit": "~3.7.0",
-        "bcncommerce/stream-wrapper": "dev-master"
+        "phpunit/phpunit": "^9.5",
+        "bcncommerce/stream-wrapper": "dev-master",
+        "symfony/yaml": "^5.2"
     },
     "autoload": {
         "psr-0": { "Bcn\\Component\\Json\\": "" }
