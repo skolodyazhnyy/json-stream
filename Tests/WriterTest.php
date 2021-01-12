@@ -10,13 +10,13 @@
 namespace Bcn\Component\Json\Tests;
 
 use Bcn\Component\Json\Writer;
-use Bcn\Component\StreamWrapper\Stream;
+use PHPUnit\Framework\TestCase;
 
 /**
  * Class WriterTest
  * @package Bcn\Component\Json\Tests
  */
-class WriterTest extends \PHPUnit_Framework_TestCase
+class WriterTest extends TestCase
 {
 
     /**
@@ -34,7 +34,7 @@ class WriterTest extends \PHPUnit_Framework_TestCase
         $encoded = stream_get_contents($stream);
         fclose($stream);
 
-        $this->assertEquals($data, json_decode($encoded, true), $encoded);
+        static::assertEquals($data, json_decode($encoded, true), $encoded);
     }
 
     public function testWriteWithCustomOptions()
@@ -49,7 +49,7 @@ class WriterTest extends \PHPUnit_Framework_TestCase
         $encoded = stream_get_contents($stream);
         fclose($stream);
 
-        $this->assertEquals("Les mystérieuses cités d'or", $encoded);
+        static::assertEquals('"Les mystérieuses cités d\'or"', $encoded);
     }
 
     /**
@@ -89,7 +89,7 @@ class WriterTest extends \PHPUnit_Framework_TestCase
         $encoded = stream_get_contents($stream);
         fclose($stream);
 
-        $this->assertEquals($items, json_decode($encoded, true), $encoded);
+        static::assertEquals($items, json_decode($encoded, true), $encoded);
     }
 
     /**
@@ -124,7 +124,7 @@ class WriterTest extends \PHPUnit_Framework_TestCase
         $encoded = stream_get_contents($stream);
         fclose($stream);
 
-        $this->assertEquals($items, json_decode($encoded, true), $encoded);
+        static::assertEquals($items, json_decode($encoded, true), $encoded);
     }
 
     /**
@@ -171,7 +171,7 @@ class WriterTest extends \PHPUnit_Framework_TestCase
         $encoded = stream_get_contents($stream);
         fclose($stream);
 
-        $this->assertEquals(
+        static::assertEquals(
             array("key" => array(array('inner' => array(array())))),
             json_decode($encoded, true),
             $encoded

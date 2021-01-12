@@ -9,14 +9,16 @@
 
 namespace Bcn\Component\Json\Tests\Parser;
 
+use Bcn\Component\Json\Exception\ParsingError;
 use Bcn\Component\Json\Parser;
 use Bcn\Component\Json\Tests\Parser\FunctionalTest\TestListener;
+use PHPUnit\Framework\TestCase;
 
 /**
  * Class FunctionalTest
  * @package Bcn\Component\Json\Tests\Parser
  */
-class FunctionalTest extends \PHPUnit_Framework_TestCase
+class FunctionalTest extends TestCase
 {
 
     /**
@@ -28,7 +30,7 @@ class FunctionalTest extends \PHPUnit_Framework_TestCase
         $parser = new Parser(fopen($this->getFixtureName('example.json'), 'r'), $listener);
         $parser->parse();
 
-        $this->assertEquals(
+        static::assertEquals(
             array(
                 'start_document',
                 'start_array',
@@ -85,7 +87,7 @@ class FunctionalTest extends \PHPUnit_Framework_TestCase
         $parser = new Parser(fopen($this->getFixtureName('data-ranges.json'), 'r'), $listener);
         $parser->parse();
 
-        $this->assertEquals(
+        static::assertEquals(
             array(
                 array('value' => '2013-10-24', 'line' => 5,  'char' => 42),
                 array('value' => '2013-10-25', 'line' => 5,  'char' => 67),
@@ -116,7 +118,7 @@ JSON
         unset($listener->positions[0]['value']);
         unset($listener->positions[1]['value']);
 
-        $this->assertSame(array(
+        static::assertSame(array(
                 array('line' => 2, 'char' => 10004,),
                 array('line' => 3, 'char' => 10004,),
             ),
@@ -132,7 +134,7 @@ JSON
         $listener = new TestListener();
         $parser = new Parser(self::inMemoryStream('{ invalid json }'), $listener);
 
-        $this->setExpectedException('Bcn\Component\Json\Exception\ParsingError', 'Parsing error in [1:3]');
+        $this->expectException(ParsingError::class);
         $parser->parse();
     }
 

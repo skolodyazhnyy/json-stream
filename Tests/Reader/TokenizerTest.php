@@ -11,9 +11,10 @@ namespace Bcn\Component\Json\Tests\Reader;
 
 use Bcn\Component\Json\Reader\Tokenizer;
 use Bcn\Component\StreamWrapper\Stream;
+use PHPUnit\Framework\TestCase;
 use Symfony\Component\Yaml\Yaml;
 
-class TokenizerTest extends \PHPUnit_Framework_TestCase
+class TokenizerTest extends TestCase
 {
 
     /**
@@ -29,7 +30,7 @@ class TokenizerTest extends \PHPUnit_Framework_TestCase
         $reader = new Tokenizer($resource);
         foreach ($tokens as $token) {
             $token['token'] = $this->toTokenCode($token['token']);
-            $this->assertEquals($token, $reader->next());
+            static::assertEquals($token, $reader->next());
         }
 
         fclose($resource);

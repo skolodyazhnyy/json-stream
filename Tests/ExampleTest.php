@@ -12,8 +12,9 @@ namespace Bcn\Component\Json\Tests;
 use Bcn\Component\Json\Reader;
 use Bcn\Component\Json\Writer;
 use Bcn\Component\StreamWrapper\Stream;
+use PHPUnit\Framework\TestCase;
 
-class ExampleTest extends \PHPUnit_Framework_TestCase
+class ExampleTest extends TestCase
 {
 
     public function testWriting()
@@ -38,7 +39,7 @@ class ExampleTest extends \PHPUnit_Framework_TestCase
 
         fclose($fh);
 
-        $this->assertEquals($this->getJSON(), $filename->getContent());
+        static::assertEquals($this->getJSON(), $filename->getContent());
     }
 
     /**
@@ -63,7 +64,7 @@ class ExampleTest extends \PHPUnit_Framework_TestCase
 
         fclose($fh);
 
-        $this->assertEquals($this->getData(), $catalog);
+        static::assertEquals($this->getData(), $catalog);
     }
 
     /**

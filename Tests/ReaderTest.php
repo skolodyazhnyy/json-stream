@@ -9,10 +9,12 @@
 
 namespace Bcn\Component\Json\Tests;
 
+use Bcn\Component\Json\Exception\ReadingError;
 use Bcn\Component\Json\Reader;
 use Bcn\Component\StreamWrapper\Stream;
+use PHPUnit\Framework\TestCase;
 
-class ReaderTest extends \PHPUnit_Framework_TestCase
+class ReaderTest extends TestCase
 {
 
     /**
@@ -35,11 +37,11 @@ JSON
 
         $reader = new Reader(fopen($stream, "r"));
 
-        $this->assertTrue($reader->enter(null, Reader::TYPE_OBJECT));  // enter root object
+        static::assertTrue($reader->enter(null, Reader::TYPE_OBJECT)); // enter root object
             $catalog = $reader->read("catalog");                       // read property catalog
             $stock   = $reader->read("stock");                         // read property stock
             $items   = array();
-            $this->assertTrue($reader->enter("items"));                // enter property items
+            static::assertTrue($reader->enter("items"));               // enter property items
                 while ($reader->enter()) {                             // enter each item
                     $sku = $reader->read("sku");                       // read property sku
                     $qty = $reader->read("qty");                       // read property qty
@@ -50,9 +52,9 @@ JSON
             $reader->leave();                                          // leave items node
         $reader->leave();                                              // leave root node
 
-        $this->assertEquals("catalog_code", $catalog);
-        $this->assertEquals("stock_code",   $stock);
-        $this->assertEquals(array(
+        static::assertEquals("catalog_code", $catalog);
+        static::assertEquals("stock_code",   $stock);
+        static::assertEquals(array(
             array('sku' => 'ABC',  'qty' => 1),
             array('sku' => 'A"BC', 'qty' => .095),
             array('sku' => 'CDE',  'qty' => 0)
@@ -78,7 +80,7 @@ JSON
         );
 
         $reader = new Reader(fopen($stream, "r"));
-        $this->assertEquals(array(
+        static::assertEquals(array(
             'catalog' => 'catalog_code',
             'stock' => 'stock_code',
             'items' => array(
@@ -111,14 +113,14 @@ JSON
 
         $reader = new Reader(fopen($stream, "r"));
 
-        $this->assertTrue($reader->enter(null, Reader::TYPE_OBJECT));  // enter root object
+        static::assertTrue($reader->enter(null, Reader::TYPE_OBJECT)); // enter root object
         $first = $reader->read("first");                               // read property first
-        $this->assertTrue($reader->enter("items"));                    // enter property items
-        $this->assertTrue($reader->leave());                           // leave items node
-        $last = $reader->read("last");                                 // leave root node
+        static::assertTrue($reader->enter("items"));                   // enter property items
+        static::assertTrue($reader->leave());                         // leave items node
+        $last = $reader->read("last");                                // leave root node
 
-        $this->assertEquals("1", $first);
-        $this->assertEquals("2", $last);
+        static::assertEquals("1", $first);
+        static::assertEquals("2", $last);
 
     }
 
@@ -132,7 +134,7 @@ JSON
     {
         $stream = new Stream($string);
         $reader = new Reader(fopen($stream, "r"));
-        $this->assertEquals($data, $reader->read());
+        static::assertEquals($data, $reader->read());
     }
 
     /**
@@ -154,7 +156,7 @@ JSON
      */
     public function testMalformedFileReading($content)
     {
-        $this->setExpectedException('Bcn\Component\Json\Exception\ReadingError');
+        $this->expectException(ReadingError::class);
 
         $reader = new Reader(fopen(new Stream($content), "r"));
         $reader->read();
